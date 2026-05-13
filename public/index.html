@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<button onclick="logout()">Выход</button>
 <h1>ООО "СТИЛСОФТ"</h1>
 
 <h2>Создание заказа</h2>
@@ -19,6 +19,15 @@
 </button>
 
 <h2>Список заказов</h2>
+
+<h2>📊 Панель управления</h2>
+
+<div style="display:flex; gap:20px; margin-bottom:20px;">
+    <div>📦 Всего: <span id="total"></span></div>
+    <div>🆕 Новые: <span id="new"></span></div>
+    <div>⚙️ В работе: <span id="progress"></span></div>
+    <div>✅ Выполнено: <span id="done"></span></div>
+</div>
 
 <table border="1" width="100%" id="ordersTable">
     <thead>

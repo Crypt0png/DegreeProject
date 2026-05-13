@@ -1,7 +1,27 @@
+const token = localStorage.getItem('token');
+
+    if (!token && !location.pathname.includes('login')) {
+    window.location.href = '/login.html';
+}
+
 async function loadOrders() {
-    const res = await fetch('/orders');
-    const orders = await res.json();
-    const token = localStorage.getItem('token');
+    const res = await fetch('/orders', {
+    headers: {
+        'Authorization': 'Bearer ' + token
+    }
+});
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+        console.error("НЕ МАССИВ:", data);
+        return;
+    }
+
+    const orders = data;
+
+    orders.forEach(o => {
+        console.log(o);
+    });
 
     const tbody = document.querySelector('#ordersTable tbody');
     tbody.innerHTML = '';
@@ -28,6 +48,11 @@ async function loadOrders() {
 
         tbody.appendChild(row);
     });
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
 }
 
 async function createOrder() {
@@ -73,3 +98,21 @@ async function updateStatus(id, status) {
 }
 
 loadOrders();
+
+async function loadDashboard() {
+
+    const res = await fetch('/api/dashboard', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    });
+
+    const data = await res.json();
+
+    document.getElementById('total').innerText = data.total || 0;
+    document.getElementById('new').innerText = data.newOrders || 0;
+    document.getElementById('progress').innerText = data.inProgress || 0;
+    document.getElementById('done').innerText = data.doneOrders || 0;
+}
+
+loadDashboard();
