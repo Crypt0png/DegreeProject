@@ -17,7 +17,6 @@
 
 <script>
 async function login() {
-
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
@@ -29,8 +28,13 @@ async function login() {
 
     const data = await res.json();
 
-    localStorage.setItem('token', data.token);
+    // ✅ Вот это добавить — было сразу localStorage.setItem без проверки
+    if (!data.token) {
+        alert('Неверный логин или пароль');
+        return;
+    }
 
+    localStorage.setItem('token', data.token);
     window.location.href = '/';
 }
 </script>

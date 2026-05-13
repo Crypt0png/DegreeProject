@@ -33,9 +33,9 @@ app.get('/api/dashboard', auth, (req, res) => {
     const sql = `
         SELECT 
             COUNT(*) as total,
-            SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as newOrders,
-            SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as doneOrders,
-            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as inProgress
+            SUM(CASE WHEN status = 'Новый' THEN 1 ELSE 0 END) as newOrders,
+            SUM(CASE WHEN status = 'Готов' THEN 1 ELSE 0 END) as doneOrders,
+            SUM(CASE WHEN status = 'В работе' THEN 1 ELSE 0 END) as inProgress
         FROM orders
     `;
 

@@ -1,8 +1,8 @@
 const router = require('express').Router();
-
+const { auth } = require('../middleware/auth');
 const db = require('../db/init');
 
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
 
     db.all(`SELECT * FROM clients`, [], (err, rows) => {
 
@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
 
 });
 
-router.post('/', (req, res) => {
+router.post('/', auth, (req, res) => {
 
     const {
         company_name,

@@ -78,7 +78,10 @@ async function createOrder() {
 
 async function deleteOrder(id) {
     await fetch(`/orders/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
     });
 
     loadOrders();
