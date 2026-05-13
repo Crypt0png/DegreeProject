@@ -11,7 +11,6 @@ router.get('/', auth, (req, res) => {
 
 // создание — worker + admin
 router.post('/', auth, checkRole(['admin', 'worker']), (req, res) => {
-
     const { title, description, status, client_id } = req.body;
 
     db.run(
@@ -26,20 +25,16 @@ router.post('/', auth, checkRole(['admin', 'worker']), (req, res) => {
 
 // удаление — только admin
 router.delete('/:id', auth, checkRole(['admin']), (req, res) => {
-
     db.run(`DELETE FROM orders WHERE id = ?`, [req.params.id]);
-
     res.json({ ok: true });
 });
 
-// статус — worker + admin
+// изменение статуса — worker + admin
 router.put('/:id', auth, checkRole(['admin', 'worker']), (req, res) => {
-
     db.run(
         `UPDATE orders SET status = ? WHERE id = ?`,
         [req.body.status, req.params.id]
     );
-
     res.json({ ok: true });
 });
 

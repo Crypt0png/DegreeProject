@@ -11,6 +11,7 @@
     <div class="header-logo">СТИЛ<span>СОФТ</span> · Заказы</div>
     <div style="display:flex; gap:10px; align-items:center;">
         <a href="/clients.html" class="btn-logout">Клиенты</a>
+        <a href="/users.html" class="btn-logout" id="usersLink" style="display:none;">Пользователи</a>
         <button class="btn-logout" onclick="logout()">Выход</button>
     </div>
 </header>
@@ -37,7 +38,7 @@
         </div>
     </div>
 
-    <!-- Создание заказа -->
+    <!-- Создание заказа (скрывается для analyst через JS) -->
     <div class="section">
         <div class="section-header">
             <span class="section-title">Новый заказ</span>

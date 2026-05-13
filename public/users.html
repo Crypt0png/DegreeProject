@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи — СТИЛСОФТ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-logo">СТИЛ<span>СОФТ</span> · Пользователи</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/" class="btn-logout">← Заказы</a>
+        <button class="btn-logout" onclick="logout()">Выход</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Создание пользователя -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Новый пользователь</span>
+        </div>
+        <div class="section-body">
+            <div class="order-form">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="username" placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" placeholder="Придумайте пароль">
+                </div>
+                <div class="form-group">
+                    <label>Роль</label>
+                    <select id="role">
+                        <option value="worker">Работник</option>
+                        <option value="analyst">Аналитик</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="createUser()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список пользователей -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Список пользователей</span>
+        </div>
+        <table class="orders-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>Роль</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+
+// Проверяем что пользователь — admin
+function getRole() {
+    try {
+        return JSON.parse(atob(token.split('.')[1])).role;
+    } catch {
+        return null;
+    }
+}
+
+if (!token || getRole() !== 'admin') {
+    window.location.href = '/';
+}
+
+const roleLabels = {
+    admin:   'Администратор',
+    worker:  'Работник',
+    analyst: 'Аналитик',
+};
+
+async function loadUsers() {
+    const res = await fetch('/users', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#6b7280; padding:32px;">Пользователей нет</td></tr>`;
+        return;
+    }
+
+    data.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="cell-id">#${user.id}</td>
+            <td><strong>${user.username}</strong></td>
+            <td>${roleLabels[user.role] || user.role}</td>
+            <td>
+                <button class="btn btn-danger" onclick="deleteUser(${user.id})">Удалить</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function createUser() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const role     = document.getElementById('role').value;
+
+    if (!username || !password) {
+        alert('Заполните логин и пароль');
+        return;
+    }
+
+    const res = await fetch('/users', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ username, password, role })
+    });
+
+    const data = await res.json();
+
+    if (data.message) {
+        alert(data.message);
+        return;
+    }
+
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+
+    loadUsers();
+}
+
+async function deleteUser(id) {
+    if (!confirm('Удалить пользователя #' + id + '?')) return;
+
+    await fetch(`/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    loadUsers();
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>

@@ -242,6 +242,15 @@ input:focus, select:focus {
 .status-done     { background: var(--green-lt);  color: var(--green); }
 .status-cancel   { background: #f3f4f6;          color: var(--text-2); }
 
+/* Бейдж статуса для режима только-чтение (analyst) */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* ─── СТРАНИЦА ЛОГИНА ────────────────────────────────── */
 .login-page {
   min-height: 100vh;
