@@ -2,45 +2,81 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Система заказов</title>
+    <title>Система заказов — СТИЛСОФТ</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<button onclick="logout()">Выход</button>
-<h1>ООО "СТИЛСОФТ"</h1>
 
-<h2>Создание заказа</h2>
+<header class="header">
+    <div class="header-logo">СТИЛ<span>СОФТ</span> · Заказы</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/clients.html" class="btn-logout">Клиенты</a>
+        <button class="btn-logout" onclick="logout()">Выход</button>
+    </div>
+</header>
 
-<input id="title" placeholder="Название">
-<input id="description" placeholder="Описание">
+<div class="container">
 
-<button onclick="createOrder()">
-    Создать
-</button>
+    <!-- Дашборд -->
+    <div class="dashboard">
+        <div class="stat-card total">
+            <div class="stat-label">Всего заказов</div>
+            <div class="stat-value" id="total">—</div>
+        </div>
+        <div class="stat-card new">
+            <div class="stat-label">Новые</div>
+            <div class="stat-value" id="new">—</div>
+        </div>
+        <div class="stat-card progress">
+            <div class="stat-label">В работе</div>
+            <div class="stat-value" id="progress">—</div>
+        </div>
+        <div class="stat-card done">
+            <div class="stat-label">Выполнено</div>
+            <div class="stat-value" id="done">—</div>
+        </div>
+    </div>
 
-<h2>Список заказов</h2>
+    <!-- Создание заказа -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Новый заказ</span>
+        </div>
+        <div class="section-body">
+            <div class="order-form">
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" id="title" placeholder="Введите название заказа">
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <input type="text" id="description" placeholder="Краткое описание">
+                </div>
+                <button class="btn btn-primary" onclick="createOrder()">Создать</button>
+            </div>
+        </div>
+    </div>
 
-<h2>📊 Панель управления</h2>
+    <!-- Список заказов -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Список заказов</span>
+        </div>
+        <table class="orders-table" id="ordersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-<div style="display:flex; gap:20px; margin-bottom:20px;">
-    <div>📦 Всего: <span id="total"></span></div>
-    <div>🆕 Новые: <span id="new"></span></div>
-    <div>⚙️ В работе: <span id="progress"></span></div>
-    <div>✅ Выполнено: <span id="done"></span></div>
 </div>
-
-<table border="1" width="100%" id="ordersTable">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Описание</th>
-            <th>Статус</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
 
 <script src="app.js"></script>
 

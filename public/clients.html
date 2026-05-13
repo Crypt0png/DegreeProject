@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Клиенты — СТИЛСОФТ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-logo">СТИЛ<span>СОФТ</span> · Клиенты</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="/" class="btn-logout">← Заказы</a>
+        <button class="btn-logout" onclick="logout()">Выход</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Добавить клиента -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Новый клиент</span>
+        </div>
+        <div class="section-body">
+            <div class="order-form">
+                <div class="form-group">
+                    <label>Название компании</label>
+                    <input type="text" id="company_name" placeholder="ООО «Название»">
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="text" id="phone" placeholder="+7 (___) ___-__-__">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="email" placeholder="mail@example.com">
+                </div>
+                <button class="btn btn-primary" onclick="createClient()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список клиентов -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-title">Список клиентов</span>
+        </div>
+        <table class="orders-table" id="clientsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Компания</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+
+if (!token) {
+    window.location.href = '/login.html';
+}
+
+async function loadClients() {
+    const res = await fetch('/clients', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+
+    const tbody = document.querySelector('#clientsTable tbody');
+    tbody.innerHTML = '';
+
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#6b7280; padding:32px;">Клиентов пока нет</td></tr>`;
+        return;
+    }
+
+    data.forEach(client => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="cell-id">#${client.id}</td>
+            <td><strong>${client.company_name}</strong></td>
+            <td>${client.phone || '—'}</td>
+            <td>${client.email || '—'}</td>
+            <td>
+                <button class="btn btn-danger" onclick="deleteClient(${client.id})">Удалить</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function createClient() {
+    const company_name = document.getElementById('company_name').value.trim();
+    const phone        = document.getElementById('phone').value.trim();
+    const email        = document.getElementById('email').value.trim();
+
+    if (!company_name) {
+        alert('Введите название компании');
+        return;
+    }
+
+    await fetch('/clients', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ company_name, phone, email })
+    });
+
+    document.getElementById('company_name').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('email').value = '';
+
+    loadClients();
+}
+
+async function deleteClient(id) {
+    if (!confirm('Удалить клиента #' + id + '?')) return;
+
+    await fetch(`/clients/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    loadClients();
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
+}
+
+loadClients();
+</script>
+
+</body>
+</html>

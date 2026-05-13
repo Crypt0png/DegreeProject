@@ -14,20 +14,6 @@ app.use('/auth', require('./routes/auth'));
 app.use('/orders', require('./routes/orders'));
 app.use('/clients', require('./routes/clients'));
 
-app.get('/seed', async (req, res) => {
-
-    const bcrypt = require('bcryptjs');
-
-    const hash = await bcrypt.hash('1234', 10);
-
-    db.run(`
-        INSERT INTO users (username, password, role)
-        VALUES (?, ?, ?)
-    `, ['admin', hash, 'admin']);
-
-    res.json({ ok: true });
-});
-
 app.get('/api/dashboard', auth, (req, res) => {
 
     const sql = `
