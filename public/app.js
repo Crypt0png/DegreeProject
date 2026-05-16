@@ -27,6 +27,22 @@ function statusClass(status) {
     return map[status] || '';
 }
 
+// Загружаем клиентов в select формы создания
+async function loadClientsSelect() {
+    const res = await fetch('/clients', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const clients = await res.json();
+
+    const select = document.getElementById('client_id');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">— Без клиента —</option>';
+    clients.forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.company_name}</option>`;
+    });
+}
+
 async function loadOrders() {
     const res = await fetch('/orders', {
         headers: { 'Authorization': 'Bearer ' + token }
@@ -42,7 +58,7 @@ async function loadOrders() {
     tbody.innerHTML = '';
 
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#6b7280; padding:32px;">Заказов пока нет</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:32px;">Заказов пока нет</td></tr>`;
         return;
     }
 
@@ -69,6 +85,7 @@ async function loadOrders() {
             <td class="cell-id">#${order.id}</td>
             <td>${order.title}</td>
             <td>${order.description || '—'}</td>
+            <td>${order.client_name || '—'}</td>
             <td>${statusCell}</td>
             <td>${deleteBtn}</td>
         `;
@@ -85,6 +102,7 @@ function logout() {
 async function createOrder() {
     const title       = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
+    const client_id   = document.getElementById('client_id').value || null;
 
     if (!title) {
         alert('Введите название заказа');
@@ -97,11 +115,12 @@ async function createOrder() {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         },
-        body: JSON.stringify({ title, description, status: 'Новый', client_id: 1 })
+        body: JSON.stringify({ title, description, status: 'Новый', client_id })
     });
 
-    document.getElementById('title').value = '';
+    document.getElementById('title').value       = '';
     document.getElementById('description').value = '';
+    document.getElementById('client_id').value   = '';
 
     loadOrders();
     loadDashboard();
@@ -154,7 +173,6 @@ function applyRoleUI() {
         if (formSection) formSection.style.display = 'none';
     }
 
-    // Показываем ссылку на управление пользователями только admin
     const usersLink = document.getElementById('usersLink');
     if (usersLink && role === 'admin') {
         usersLink.style.display = 'inline-block';
@@ -163,4 +181,5 @@ function applyRoleUI() {
 
 loadOrders();
 loadDashboard();
+loadClientsSelect();
 applyRoleUI();

@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <!-- Создание заказа (скрывается для analyst через JS) -->
+    <!-- Создание заказа (скрывается для analyst) -->
     <div class="section">
         <div class="section-header">
             <span class="section-title">Новый заказ</span>
@@ -52,6 +52,12 @@
                 <div class="form-group">
                     <label>Описание</label>
                     <input type="text" id="description" placeholder="Краткое описание">
+                </div>
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <select id="client_id">
+                        <option value="">— Без клиента —</option>
+                    </select>
                 </div>
                 <button class="btn btn-primary" onclick="createOrder()">Создать</button>
             </div>
@@ -69,6 +75,7 @@
                     <th>ID</th>
                     <th>Название</th>
                     <th>Описание</th>
+                    <th>Клиент</th>
                     <th>Статус</th>
                     <th>Действия</th>
                 </tr>
