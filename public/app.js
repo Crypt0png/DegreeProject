@@ -16,6 +16,9 @@ function getRole() {
 
 const role = getRole();
 
+// Все заказы храним в памяти чтобы фильтровать без запросов
+let allOrders = [];
+
 // Маппинг статуса → CSS-класс
 function statusClass(status) {
     const map = {
@@ -43,30 +46,20 @@ async function loadClientsSelect() {
     });
 }
 
-async function loadOrders() {
-    const res = await fetch('/orders', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-
-    if (!Array.isArray(data)) {
-        console.error("НЕ МАССИВ:", data);
-        return;
-    }
-
+// Рендерим строки таблицы из массива
+function renderOrders(orders) {
     const tbody = document.querySelector('#ordersTable tbody');
     tbody.innerHTML = '';
 
-    if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:32px;">Заказов пока нет</td></tr>`;
+    if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:32px;">Заказов не найдено</td></tr>`;
         return;
     }
 
-    data.forEach(order => {
+    orders.forEach(order => {
         const row = document.createElement('tr');
         const cls = statusClass(order.status);
 
-        // analyst видит статус как текст, не как select
         const statusCell = role === 'analyst'
             ? `<span class="status-badge ${cls}">${order.status}</span>`
             : `<select class="status-select ${cls}" onchange="updateStatus(${order.id}, this)">
@@ -76,7 +69,6 @@ async function loadOrders() {
                 <option ${order.status === 'Отменён'  ? 'selected' : ''}>Отменён</option>
                </select>`;
 
-        // кнопку удаления видит только admin
         const deleteBtn = role === 'admin'
             ? `<button class="btn btn-danger" onclick="deleteOrder(${order.id})">Удалить</button>`
             : '—';
@@ -92,6 +84,36 @@ async function loadOrders() {
 
         tbody.appendChild(row);
     });
+}
+
+// Фильтр по статусу — работает на клиенте без запросов
+function filterOrders() {
+    const filterEl = document.getElementById('statusFilter');
+    const selected = filterEl.value;
+
+    // Обновляем цвет самого select фильтра
+    filterEl.className = 'status-filter ' + (selected ? statusClass(selected) : '');
+
+    const filtered = selected
+        ? allOrders.filter(o => o.status === selected)
+        : allOrders;
+
+    renderOrders(filtered);
+}
+
+async function loadOrders() {
+    const res = await fetch('/orders', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+        console.error("НЕ МАССИВ:", data);
+        return;
+    }
+
+    allOrders = data;
+    filterOrders(); // рендерим с учётом текущего фильтра
 }
 
 function logout() {
@@ -151,6 +173,10 @@ async function updateStatus(id, selectEl) {
         body: JSON.stringify({ status })
     });
 
+    // Обновляем локально чтобы фильтр не сбрасывался
+    const order = allOrders.find(o => o.id === id);
+    if (order) order.status = status;
+
     loadDashboard();
 }
 
@@ -166,7 +192,6 @@ async function loadDashboard() {
     document.getElementById('done').innerText     = data.doneOrders ?? 0;
 }
 
-// Скрываем форму создания для analyst
 function applyRoleUI() {
     if (role === 'analyst') {
         const formSection = document.querySelector('.section:nth-child(2)');

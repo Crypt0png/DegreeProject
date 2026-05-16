@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система заказов — СТИЛСОФТ</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -68,6 +69,14 @@
     <div class="section">
         <div class="section-header">
             <span class="section-title">Список заказов</span>
+            <!-- Фильтр по статусу -->
+            <select id="statusFilter" class="status-select status-new" onchange="filterOrders()">
+                <option value="">Все статусы</option>
+                <option value="Новый">Новый</option>
+                <option value="В работе">В работе</option>
+                <option value="Готов">Готов</option>
+                <option value="Отменён">Отменён</option>
+            </select>
         </div>
         <table class="orders-table" id="ordersTable">
             <thead>

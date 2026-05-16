@@ -242,6 +242,21 @@ input:focus, select:focus {
 .status-done     { background: var(--green-lt);  color: var(--green); }
 .status-cancel   { background: #f3f4f6;          color: var(--text-2); }
 
+/* Фильтр статусов в шапке секции */
+.status-filter {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: var(--bg);
+  color: var(--text-2);
+  font-family: inherit;
+}
+.status-filter:focus { outline: none; }
+
 /* Бейдж статуса для режима только-чтение (analyst) */
 .status-badge {
   display: inline-block;
