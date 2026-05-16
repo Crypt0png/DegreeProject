@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
 const { auth } = require('./middleware/auth');
 const db = require('./db/init');
 const app = express();
@@ -29,6 +30,29 @@ app.get('/api/dashboard', auth, (req, res) => {
     });
 });
 
+// ── Первый запуск: создаём admin если база пустая ──────
+async function createDefaultAdmin() {
+    db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
+        if (err || row.count > 0) return;
+
+        const hash = await bcrypt.hash('admin', 10);
+
+        db.run(
+            `INSERT INTO users (username, password, role) VALUES (?, ?, ?)`,
+            ['admin', hash, 'admin'],
+            () => {
+                console.log('──────────────────────────────────────────');
+                console.log('  Создан администратор по умолчанию:');
+                console.log('  Логин:  admin');
+                console.log('  Пароль: admin');
+                console.log('  Смените пароль после первого входа!');
+                console.log('──────────────────────────────────────────');
+            }
+        );
+    });
+}
+
 app.listen(3000, () => {
     console.log('Server started on port 3000');
+    createDefaultAdmin();
 });
