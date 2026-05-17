@@ -4,7 +4,6 @@ if (!token && !location.pathname.includes('login')) {
     window.location.href = '/login.html';
 }
 
-// Декодируем роль из JWT без библиотек
 function getRole() {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -15,11 +14,31 @@ function getRole() {
 }
 
 const role = getRole();
-
-// Все заказы храним в памяти чтобы фильтровать без запросов
 let allOrders = [];
 
-// Маппинг статуса → CSS-класс
+// ─── ТОСТЫ ───────────────────────────────────────────────
+function toast(message, type = 'info') {
+    const icons = { success: '✓', error: '✕', info: 'i' };
+
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${message}</span>`;
+    container.appendChild(el);
+
+    setTimeout(() => {
+        el.style.animation = 'toast-out .2s ease forwards';
+        setTimeout(() => el.remove(), 200);
+    }, 3000);
+}
+
+// ─── СТАТУСЫ ─────────────────────────────────────────────
 function statusClass(status) {
     const map = {
         'Новый':    'status-new',
@@ -30,7 +49,7 @@ function statusClass(status) {
     return map[status] || '';
 }
 
-// Загружаем клиентов в select формы создания
+// ─── КЛИЕНТЫ В SELECT ────────────────────────────────────
 async function loadClientsSelect() {
     const res = await fetch('/clients', {
         headers: { 'Authorization': 'Bearer ' + token }
@@ -46,13 +65,13 @@ async function loadClientsSelect() {
     });
 }
 
-// Рендерим строки таблицы из массива
+// ─── РЕНДЕР ТАБЛИЦЫ ──────────────────────────────────────
 function renderOrders(orders) {
     const tbody = document.querySelector('#ordersTable tbody');
     tbody.innerHTML = '';
 
     if (!orders.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:32px;">Заказов не найдено</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:32px;">Заказов не найдено</td></tr>`;
         return;
     }
 
@@ -81,26 +100,20 @@ function renderOrders(orders) {
             <td>${statusCell}</td>
             <td>${deleteBtn}</td>
         `;
-
         tbody.appendChild(row);
     });
 }
 
-// Фильтр по статусу — работает на клиенте без запросов
+// ─── ФИЛЬТР ──────────────────────────────────────────────
 function filterOrders() {
     const filterEl = document.getElementById('statusFilter');
     const selected = filterEl.value;
-
-    // Обновляем цвет самого select фильтра
     filterEl.className = 'status-filter ' + (selected ? statusClass(selected) : '');
-
-    const filtered = selected
-        ? allOrders.filter(o => o.status === selected)
-        : allOrders;
-
+    const filtered = selected ? allOrders.filter(o => o.status === selected) : allOrders;
     renderOrders(filtered);
 }
 
+// ─── ЗАГРУЗКА ЗАКАЗОВ ─────────────────────────────────────
 async function loadOrders() {
     const res = await fetch('/orders', {
         headers: { 'Authorization': 'Bearer ' + token }
@@ -113,25 +126,21 @@ async function loadOrders() {
     }
 
     allOrders = data;
-    filterOrders(); // рендерим с учётом текущего фильтра
+    filterOrders();
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
-}
-
+// ─── СОЗДАНИЕ ЗАКАЗА ─────────────────────────────────────
 async function createOrder() {
     const title       = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
     const client_id   = document.getElementById('client_id').value || null;
 
     if (!title) {
-        alert('Введите название заказа');
+        toast('Введите название заказа', 'error');
         return;
     }
 
-    await fetch('/orders', {
+    const res = await fetch('/orders', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -140,31 +149,42 @@ async function createOrder() {
         body: JSON.stringify({ title, description, status: 'Новый', client_id })
     });
 
-    document.getElementById('title').value       = '';
-    document.getElementById('description').value = '';
-    document.getElementById('client_id').value   = '';
-
-    loadOrders();
-    loadDashboard();
+    if (res.ok) {
+        document.getElementById('title').value       = '';
+        document.getElementById('description').value = '';
+        document.getElementById('client_id').value   = '';
+        toast('Заказ создан', 'success');
+        loadOrders();
+        loadDashboard();
+    } else {
+        toast('Ошибка при создании заказа', 'error');
+    }
 }
 
+// ─── УДАЛЕНИЕ ЗАКАЗА ─────────────────────────────────────
 async function deleteOrder(id) {
     if (!confirm('Удалить заказ #' + id + '?')) return;
 
-    await fetch(`/orders/${id}`, {
+    const res = await fetch(`/orders/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
     });
 
-    loadOrders();
-    loadDashboard();
+    if (res.ok) {
+        toast('Заказ удалён', 'info');
+        loadOrders();
+        loadDashboard();
+    } else {
+        toast('Ошибка при удалении', 'error');
+    }
 }
 
+// ─── СМЕНА СТАТУСА ───────────────────────────────────────
 async function updateStatus(id, selectEl) {
     const status = selectEl.value;
     selectEl.className = 'status-select ' + statusClass(status);
 
-    await fetch(`/orders/${id}`, {
+    const res = await fetch(`/orders/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -173,13 +193,17 @@ async function updateStatus(id, selectEl) {
         body: JSON.stringify({ status })
     });
 
-    // Обновляем локально чтобы фильтр не сбрасывался
-    const order = allOrders.find(o => o.id === id);
-    if (order) order.status = status;
-
-    loadDashboard();
+    if (res.ok) {
+        const order = allOrders.find(o => o.id === id);
+        if (order) order.status = status;
+        toast(`Статус изменён на «${status}»`, 'success');
+        loadDashboard();
+    } else {
+        toast('Ошибка при изменении статуса', 'error');
+    }
 }
 
+// ─── ДАШБОРД ─────────────────────────────────────────────
 async function loadDashboard() {
     const res = await fetch('/api/dashboard', {
         headers: { 'Authorization': 'Bearer ' + token }
@@ -192,6 +216,7 @@ async function loadDashboard() {
     document.getElementById('done').innerText     = data.doneOrders ?? 0;
 }
 
+// ─── РОЛИ ────────────────────────────────────────────────
 function applyRoleUI() {
     if (role === 'analyst') {
         const formSection = document.querySelector('.section:nth-child(2)');
@@ -202,6 +227,11 @@ function applyRoleUI() {
     if (usersLink && role === 'admin') {
         usersLink.style.display = 'inline-block';
     }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/login.html';
 }
 
 loadOrders();

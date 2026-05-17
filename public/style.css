@@ -54,9 +54,7 @@ body {
   letter-spacing: .04em;
   color: #fff;
 }
-.header-logo span {
-  color: #60a5fa;
-}
+.header-logo span { color: #60a5fa; }
 .btn-logout {
   background: transparent;
   border: 1px solid rgba(255,255,255,.25);
@@ -67,6 +65,7 @@ body {
   font-size: 13px;
   font-family: inherit;
   transition: all .15s;
+  text-decoration: none;
 }
 .btn-logout:hover {
   background: rgba(255,255,255,.1);
@@ -109,10 +108,10 @@ body {
   font-weight: 500;
   color: var(--text);
 }
-.stat-card.new    { border-top: 3px solid var(--accent); }
+.stat-card.new      { border-top: 3px solid var(--accent); }
 .stat-card.progress { border-top: 3px solid var(--amber); }
-.stat-card.done   { border-top: 3px solid var(--green); }
-.stat-card.total  { border-top: 3px solid #9ca3af; }
+.stat-card.done     { border-top: 3px solid var(--green); }
+.stat-card.total    { border-top: 3px solid #9ca3af; }
 
 /* ─── СЕКЦИИ ─────────────────────────────────────────── */
 .section {
@@ -135,9 +134,7 @@ body {
   font-weight: 600;
   color: var(--text);
 }
-.section-body {
-  padding: 20px;
-}
+.section-body { padding: 20px; }
 
 /* ─── ФОРМА СОЗДАНИЯ ─────────────────────────────────── */
 .order-form {
@@ -190,10 +187,7 @@ input:focus, select:focus {
   transition: all .15s;
   white-space: nowrap;
 }
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
+.btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: #1d4ed8; }
 .btn-danger {
   background: var(--red-lt);
@@ -202,7 +196,7 @@ input:focus, select:focus {
 }
 .btn-danger:hover { background: #fee2e2; }
 
-/* ─── ТАБЛИЦА ЗАКАЗОВ ────────────────────────────────── */
+/* ─── ТАБЛИЦА ────────────────────────────────────────── */
 .orders-table {
   width: 100%;
   border-collapse: collapse;
@@ -226,7 +220,7 @@ input:focus, select:focus {
 .orders-table tr:last-child td { border-bottom: none; }
 .orders-table tr:hover td { background: #f8faff; }
 
-/* ─── БЕЙДЖИ СТАТУСОВ ────────────────────────────────── */
+/* ─── СТАТУСЫ ────────────────────────────────────────── */
 .status-select {
   height: 28px;
   padding: 0 8px;
@@ -264,6 +258,44 @@ input:focus, select:focus {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+}
+
+/* ─── ТОСТЫ ──────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  min-width: 240px;
+  animation: toast-in .2s ease;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.info    { border-left: 3px solid var(--accent); }
+.toast-icon    { font-size: 15px; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(12px); }
 }
 
 /* ─── СТРАНИЦА ЛОГИНА ────────────────────────────────── */
